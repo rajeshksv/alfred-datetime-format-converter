@@ -21,6 +21,8 @@ def parse_query_value(query_str):
         else:
             # Parse datetime string or timestamp
             try:
+                if (float(query_str) > 9999999999):
+                    query_str = float(query_str)/1000
                 d = epoch(float(query_str))
             except ValueError:
                 d = parse(str(query_str))
@@ -50,31 +52,29 @@ def alfred_items_for_value(value):
     ))
     index += 1
 
-    # Various formats
-    formats = [
-        # 1937-01-01 12:00:27
-        ("%Y-%m-%d %H:%M:%S", ''),
-        # 19 May 2002 15:21:36
-        ("%d %b %Y %H:%M:%S", ''), 
-        # Sun, 19 May 2002 15:21:36
-        ("%a, %d %b %Y %H:%M:%S", ''), 
-        # 1937-01-01T12:00:27
-        ("%Y-%m-%dT%H:%M:%S", ''),
-        # 1996-12-19T16:39:57-0800
-        ("%Y-%m-%dT%H:%M:%S%z", ''),
-    ]
-    for format, description in formats:
-        item_value = value.datetime.strftime(format)
-        results.append(alfred.Item(
-            title=str(item_value),
-            subtitle=description,
-            attributes={
-                'uid': alfred.uid(index), 
-                'arg': item_value,
-            },
-        icon='icon.png',
-        ))
-        index += 1
+    item_value = value.datetime.strftime("%Y-%m-%d %H:%M:%S")
+    results.append(alfred.Item(
+        title=str(item_value),
+        subtitle="UTC",
+        attributes={
+            'uid': alfred.uid(index), 
+            'arg': item_value,
+        },
+    icon='icon.png',
+    ))
+    index += 1
+
+    item_value = value.shift('Asia/Kolkata').datetime.strftime("%Y-%m-%d %H:%M:%S")
+    results.append(alfred.Item(
+        title=str(item_value),
+        subtitle="IST",
+        attributes={
+            'uid': alfred.uid(index), 
+            'arg': item_value,
+        },
+    icon='icon.png',
+    ))
+    index += 1
 
     return results
 
